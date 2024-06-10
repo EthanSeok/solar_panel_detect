@@ -4,6 +4,14 @@ from PIL import Image
 import base64
 from io import BytesIO
 
+def read_image(data):
+    base64_image_data = data['imageData']
+    image_data = base64.b64decode(base64_image_data)
+
+    image_stream = BytesIO(image_data)
+    image = Image.open(image_stream)
+    return image
+
 def encode_image_to_base64(image):
     buffered = BytesIO()
     image.save(buffered, format="PNG")
@@ -19,7 +27,7 @@ def flip_coordinates(coords, image_width, image_height, mode='horizontal'):
     if mode == 'horizontal':
         return [[image_width - x, y] for [x, y] in coords]
     elif mode == 'vertical':
-        return [[image_width - x, image_height - y] for [x, y] in coords]  # 좌우와 상하 모두 반전
+        return [[image_width - x, image_height - y] for [x, y] in coords]
 
 def save_flipped_image(image, output_path, mode, filename):
     image.save(os.path.join(output_path, f'{mode}_{filename}'))
@@ -36,10 +44,9 @@ def process_images(input_folder, output_folder):
             with open(os.path.join(input_folder, filename), 'r') as f:
                 label_data = json.load(f)
 
-            image_path = label_data["imagePath"]
-            image = Image.open(image_path)
+            image = read_image(label_data)
 
-            # 좌우 반전
+            # Process for horizontal flip
             flipped_image = flip_image(image, mode='horizontal')
             flipped_filename = filename.replace('.json', '.png')
             save_flipped_image(flipped_image, images_output_folder, 'flipped', flipped_filename)
@@ -53,7 +60,7 @@ def process_images(input_folder, output_folder):
             with open(flipped_label_path, 'w') as f:
                 json.dump(flipped_label_data, f, indent=4)
 
-            # 상하 반전
+            # Process for vertical flip
             vertically_flipped_image = flip_image(image, mode='vertical')
             vertically_flipped_filename = filename.replace('.json', '.png')
             save_flipped_image(vertically_flipped_image, images_output_folder, 'vertically_flipped', vertically_flipped_filename)
