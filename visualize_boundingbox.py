@@ -64,7 +64,7 @@ def main():
     directory = "./output/augmentation/label"
 
     ## Labelme JSON 파일명
-    json_data = 'rotated_350_w329.json'
+    json_data = 'rotated_30_w001.json'
 
     with open(os.path.join(directory, json_data), 'r', encoding='utf-8') as file:
         data = json.load(file)
