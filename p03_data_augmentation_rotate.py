@@ -93,6 +93,11 @@ def rotate_point(origin, point, angle):
     return qx, qy
 
 
+def trim_point(c1, x0, y0, width, height):
+    return (min(max(0, x0+c1[0]), width),
+            min(max(0, y0+c1[1]), height))
+
+
 def rotate_annotation(origin, annotation, degree):
     new_annotation = copy.deepcopy(annotation)
 
@@ -130,7 +135,43 @@ def rotate_annotation(origin, annotation, degree):
 
     x_coords, y_coords = zip(c1, c2, c3, c4)
     new_annotation["width"] = round(max(x_coords) - min(x_coords))
+    # print(c1, c2, c3, c4)
+    # print('x_coords', x_coords)
+    # print('y_coords', y_coords)
+
     new_annotation["height"] = round(max(y_coords) - min(y_coords))
+    # print('x', new_x, min(x_coords))
+    # print('y', -new_y, min(y_coords))
+    # new_annotation["x"] = min(x_coords)
+    # new_annotation["y"] = min(y_coords)
+
+    # print("before", c1, c2, c3, c4)
+    # cn1 = trim_point(c1, new_x, -new_y, origin_x*2, origin_y*-2)
+    # cn2 = trim_point(c2, new_x, -new_y, origin_x*2, origin_y*-2)
+    # cn3 = trim_point(c3, new_x, -new_y, origin_x*2, origin_y*-2)
+    # cn4 = trim_point(c4, new_x, -new_y, origin_x*2, origin_y*-2)
+    # # print("after trim", c1, c2, c3, c4)
+    #
+    # x_coords, y_coords = zip(cn1, cn2, cn3, cn4)
+    # new_annotation["width"] = round(max(x_coords) - min(x_coords))
+    # new_annotation["height"] = round(max(y_coords) - min(y_coords))
+    # new_annotation["x"] = min(x_coords)
+    # new_annotation["y"] = min(y_coords)
+
+    x0 = new_annotation["x"] - new_annotation["width"]/2
+    y0 = new_annotation["y"] - new_annotation["height"]/2
+    x1 = x0 + new_annotation["width"]
+    y1 = y0 + new_annotation["height"]
+    # print(x0, x1, y0, y1)
+    x0 = max(x0, 0)
+    y0 = max(y0, 0)
+    x1 = min(origin_x*2, x1)
+    y1 = min(-origin_y*2, y1)
+    new_annotation["x"] = (x0 + x1)/2
+    new_annotation["y"] = (y0 + y1)/2
+    new_annotation["width"] = x1 - x0
+    new_annotation["height"] = y1 - y0
+    # print('after', x0, x1, y0, y1)
 
     return new_annotation
 
@@ -203,13 +244,6 @@ def visualize_annotations(image, annotations):
     # plt.axis('off')
     plt.show()
 
-
-import os
-import json
-import numpy as np
-from PIL import Image
-
-
 def main():
     directory = "./output/labelme_label/"
     output_image_dir = "./output/augmentation/images/"
@@ -227,12 +261,12 @@ def main():
 
         im = np.array(read_image(data)).astype(np.float64) / 255
 
-        for angle in range(0, 360, 10):
+        for angle in range(10, 360, 10):
             rotated = rotate_image(im, angle)
             cropped = crop_to_center(im, rotated)
             cropped_image = Image.fromarray((cropped * 255).astype(np.uint8))
 
-            image_filename = f'rotated_{angle}_' + json_data.split(".")[0] + '.png'
+            image_filename = f'rotated_{angle:03d}_' + json_data.split(".")[0] + '.png'
             cropped_image_path = os.path.join(output_image_dir, image_filename)
             cropped_image.save(cropped_image_path)
 
@@ -241,7 +275,7 @@ def main():
                                    annotations]
 
             image_base64 = image_to_base64(cropped)
-            json_filename = f'rotated_{angle}_' + json_data.split(".")[0] + '.json'
+            json_filename = f'rotated_{angle:03d}_' + json_data.split(".")[0] + '.json'
             json_file_path = os.path.join(output_label_dir, json_filename)
             save_to_labelme_json(json_file_path, image_base64, rotated_annotations, cropped.shape)
 
