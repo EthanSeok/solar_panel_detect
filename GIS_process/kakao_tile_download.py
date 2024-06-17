@@ -4,7 +4,7 @@ import time
 
 
 def download_image(zoom, xtile, ytile, output_dir):
-    url = f"https://map0.daumcdn.net/map_skyview_hd/L{zoom}/{xtile}/{ytile}.jpg"
+    url = f"https://map0.daumcdn.net/map_skyview_hd/L{zoom}/{ytile}/{xtile}.jpg"
     file_path = os.path.join(output_dir, f"{xtile}_{ytile}_{zoom}.jpg")
 
     response = requests.get(url)
@@ -17,8 +17,8 @@ def download_image(zoom, xtile, ytile, output_dir):
 
 
 def main():
-    zoom = 3
-    output_dir = "output"
+    zoom = 2
+    output_dir = "output/jeonju_2/"
 
     # output 폴더 생성
     if not os.path.exists(output_dir):
@@ -26,8 +26,8 @@ def main():
 
     count = 0
 
-    for xtile in range(620, 821):
-        for ytile in range(580, 781):
+    for xtile in range(1856, 1921): ## xtile == 첫 번째 숫자
+        for ytile in range(2432, 2446): ## ytile == 두 번째 숫자
             download_image(zoom, xtile, ytile, output_dir)
             count += 1
 
