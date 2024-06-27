@@ -26,7 +26,7 @@ def save_labelme_json(image_path, coordinates, output_dir):
     image_width, image_height = get_image_size(image_path)
     shapes = [
         {
-            "label": "solar pannel",
+            "label": "solar panel",
             "points": [
                 [coords[0], coords[1]],
                 [coords[2], coords[3]]
