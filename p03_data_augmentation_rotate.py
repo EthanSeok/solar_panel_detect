@@ -10,6 +10,7 @@ from io import BytesIO
 import io
 import cv2
 import os
+from tqdm import tqdm
 
 def read_image(data):
     base64_image_data = data['imageData']
@@ -187,7 +188,7 @@ def calculate_annotations(data):
         height = ymax - ymin
 
         annotations.append({
-            "label": "solar pannel",
+            "label": "solar panel",
             "x": (xmin + xmax) / 2,
             "y": (ymin + ymax) / 2,
             "width": width,
@@ -246,8 +247,10 @@ def visualize_annotations(image, annotations):
 
 def main():
     directory = "./output/labelme_label/"
-    output_image_dir = "./output/augmentation/images/"
-    output_label_dir = "./output/augmentation/label/"
+    # output_image_dir = "./output/augmentation/images/"
+    output_image_dir = "D:/DATA/태양광 이미지 데이터/20240611_output/images/"
+    # output_label_dir = "./output/augmentation/label/"
+    output_label_dir = "D:/DATA/태양광 이미지 데이터/20240611_output/label/"
 
     os.makedirs(output_image_dir, exist_ok=True)
     os.makedirs(output_label_dir, exist_ok=True)
@@ -255,13 +258,13 @@ def main():
     filenames = [filename for filename in os.listdir(directory) if filename.endswith(".json")]
     print(filenames)
 
-    for json_data in filenames:
+    for json_data in tqdm(filenames):
         with open(os.path.join(directory, json_data), 'r', encoding='utf-8') as file:
             data = json.load(file)
 
         im = np.array(read_image(data)).astype(np.float64) / 255
 
-        for angle in range(10, 360, 10):
+        for angle in range(10, 360, 90):
             rotated = rotate_image(im, angle)
             cropped = crop_to_center(im, rotated)
             cropped_image = Image.fromarray((cropped * 255).astype(np.uint8))
