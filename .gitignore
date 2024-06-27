@@ -8,3 +8,4 @@ yolo_train
 yolo_sam/models
 yolo_sam/runs
 GIS_process/models
+GIS_process/result_image
